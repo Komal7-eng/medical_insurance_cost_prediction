@@ -1,4 +1,3 @@
-
 name: Week 2 Practice Exercise
 
 on:
@@ -10,33 +9,58 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
       - name: Install Dependencies
-        run: pip install -r week_2_practice/requirements.txt
+        run: |
+          pip install --upgrade pip
+          pip install -r week_2_practice/requirements.txt
+
       - name: Upload Dataset to Hugging Face Hub
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: python week_2_practice/model_building/data_register.py
+
 
   data-prep:
     needs: register-dataset
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
       - name: Install Dependencies
-        run: pip install -r week_2_practice/requirements.txt
+        run: |
+          pip install --upgrade pip
+          pip install -r week_2_practice/requirements.txt
+
       - name: Run Data Preparation
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: python week_2_practice/model_building/prep.py
 
 
-  model-traning:
+  model-training:
     needs: data-prep
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
       - name: Install Dependencies
-        run: pip install -r week_2_practice/requirements.txt
+        run: |
+          pip install --upgrade pip
+          pip install -r week_2_practice/requirements.txt
+
       - name: Model Building
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
@@ -44,14 +68,21 @@ jobs:
 
 
   deploy-hosting:
+    needs: [model-training, data-prep, register-dataset]
     runs-on: ubuntu-latest
-    needs: [model-traning,data-prep,register-dataset]
     steps:
       - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
       - name: Install Dependencies
-        run: pip install -r week_2_practice/requirements.txt
+        run: |
+          pip install --upgrade pip
+          pip install -r week_2_practice/requirements.txt
+
       - name: Push files to Frontend Hugging Face Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: python week_2_practice/hosting/hosting.py
-
