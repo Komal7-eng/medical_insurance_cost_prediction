@@ -1,3 +1,4 @@
+
 name: Week 2 Practice Exercise
 
 on:
@@ -9,76 +10,48 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - run: pip install -r week_2_practice/deployment/requirements.txt
-
-      - name: Upload Dataset
+      - name: Install Dependencies
+        run: pip install -r week_2_practice/requirements.txt
+      - name: Upload Dataset to Hugging Face Hub
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: |
-          python -c "from huggingface_hub import login; import os; login(token=os.environ['HF_TOKEN'])"
-          python week_2_practice/model_building/data_register.py
-
+        run: python week_2_practice/model_building/data_register.py
 
   data-prep:
     needs: register-dataset
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - run: pip install -r week_2_practice/deployment/requirements.txt
-
-      - name: Run Data Prep
+      - name: Install Dependencies
+        run: pip install -r week_2_practice/requirements.txt
+      - name: Run Data Preparation
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: |
-          python -c "from huggingface_hub import login; import os; login(token=os.environ['HF_TOKEN'])"
-          python week_2_practice/model_building/prep.py
+        run: python week_2_practice/model_building/prep.py
 
 
-  model-training:
+  model-traning:
     needs: data-prep
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - run: pip install -r week_2_practice/deployment/requirements.txt
-
-      - name: Train Model
+      - name: Install Dependencies
+        run: pip install -r week_2_practice/requirements.txt
+      - name: Model Building
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: |
-          python -c "from huggingface_hub import login; import os; login(token=os.environ['HF_TOKEN'])"
-          python week_2_practice/model_building/train.py
+        run: python week_2_practice/model_building/train.py
 
 
   deploy-hosting:
-    needs: model-training
     runs-on: ubuntu-latest
+    needs: [model-traning,data-prep,register-dataset]
     steps:
       - uses: actions/checkout@v3
-
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - run: pip install -r week_2_practice/deployment/requirements.txt
-
-      - name: Deploy to Hugging Face Space
+      - name: Install Dependencies
+        run: pip install -r week_2_practice/requirements.txt
+      - name: Push files to Frontend Hugging Face Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: |
-          python -c "from huggingface_hub import login; import os; login(token=os.environ['HF_TOKEN'])"
-          python week_2_practice/hosting/hosting.py
+        run: python week_2_practice/hosting/hosting.py
+
